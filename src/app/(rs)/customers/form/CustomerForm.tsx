@@ -5,6 +5,10 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Form } from '@/components/ui/form'
 import { Button } from '@/components/ui/button'
 import { insertCustomerSchema, type TInsertCustomerSchema, type TSelectCustomerSchema } from '@/schemas/customer'
+import { InputLabel } from '@/components/inputs/InputLabel'
+import { TextAreaLabel } from '@/components/inputs/TextAreaLabel'
+import { SelectLabel } from '@/components/inputs/SelectLabel'
+import { StatesArray } from '@/constants/StatesArray'
 
 type Props = {
   customer?: TInsertCustomerSchema
@@ -45,10 +49,46 @@ export default function CustomerForm({ customer }: Props) {
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(submitForm)}
-          className="flex flex-col sm:flex-row gap-4 sm:gap-8"
+          className="flex flex-col md:flex-row gap-4 md:gap-8"
         >
+          <div className='flex flex-col gap-4 w-full max-w-xs'>
+            <InputLabel<TInsertCustomerSchema> fieldTitle='First Name' nameInSchema='firstName' />
 
-          <p>{JSON.stringify(form.getValues())}</p>
+            <InputLabel<TInsertCustomerSchema> fieldTitle='Last Name' nameInSchema='lastName' />
+
+            <InputLabel<TInsertCustomerSchema> fieldTitle='Address 1' nameInSchema='address1' />
+
+            <InputLabel<TInsertCustomerSchema> fieldTitle='Address 2' nameInSchema='address2' />
+
+            <InputLabel<TInsertCustomerSchema> fieldTitle='City' nameInSchema='city' />
+
+            <SelectLabel<TSelectCustomerSchema>
+              fieldTitle='State'
+              nameInSchema='state'
+              data={StatesArray}
+            />
+  
+          </div>
+
+          <div className='flex flex-col gap-4 w-full max-w-xs'>
+            <InputLabel<TInsertCustomerSchema> fieldTitle='Zip Code' nameInSchema='zip' />
+
+            <InputLabel<TInsertCustomerSchema> fieldTitle='Email' nameInSchema='email' />
+
+            <InputLabel<TInsertCustomerSchema> fieldTitle='Phone Number' nameInSchema='phone' />
+
+            <TextAreaLabel<TInsertCustomerSchema> fieldTitle='Notes' nameInSchema='notes' className='h-40'/>
+
+            <div className='flex gap-2'>
+              <Button type='submit' className='w-3/4' variant='default' title='Save'>
+                Save
+              </Button>
+              <Button type='button' variant='destructive' title='Reset' onClick={() => form.reset(defaultValues)}>
+                Reset
+              </Button>
+            </div>
+          </div>
+
 
         </form>
       </Form>
