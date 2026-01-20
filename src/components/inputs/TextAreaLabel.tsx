@@ -4,6 +4,7 @@ import { useFormContext } from 'react-hook-form'
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Textarea } from '@/components/ui/textarea'
 import { TextareaHTMLAttributes } from 'react'
+import { cn } from '@/lib/utils'
 
 type Props<S> = {
   fieldTitle: string,
@@ -32,7 +33,7 @@ export function TextAreaLabel<S>({
           <FormControl>
             <Textarea
               id={nameInSchema}
-              className={className}
+              className={cn("w-full max-w-xs disabled:text-blue-500 dark:disabled:text-yellow-300 disabled:opacity-75 disabled:cursor-not-allowed", className)}
               {...props}
               {...field}
             />

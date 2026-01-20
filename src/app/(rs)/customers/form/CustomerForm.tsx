@@ -2,6 +2,7 @@
 
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useKindeBrowserClient } from '@kinde-oss/kinde-auth-nextjs'
 import { Form } from '@/components/ui/form'
 import { Button } from '@/components/ui/button'
 import { insertCustomerSchema, type TInsertCustomerSchema, type TSelectCustomerSchema } from '@/schemas/customer'
@@ -9,12 +10,16 @@ import { InputLabel } from '@/components/inputs/InputLabel'
 import { TextAreaLabel } from '@/components/inputs/TextAreaLabel'
 import { SelectLabel } from '@/components/inputs/SelectLabel'
 import { StatesArray } from '@/constants/StatesArray'
+import { CheckboxLabel } from '@/components/inputs/CheckboxLabel'
 
 type Props = {
   customer?: TInsertCustomerSchema
 }
 
 export default function CustomerForm({ customer }: Props) {
+  const { getPermission, isLoading } = useKindeBrowserClient();
+  const isManager = !isLoading && getPermission("manager")?.isGranted;
+
   const defaultValues: TInsertCustomerSchema = {
     id: customer?.id ?? 0,
     firstName: customer?.firstName ?? '',
@@ -27,6 +32,7 @@ export default function CustomerForm({ customer }: Props) {
     state: customer?.state ?? '',
     zip: customer?.zip ?? '',
     notes: customer?.notes ?? '',
+    active: customer?.active ?? true,
   }
 
   const form = useForm<TInsertCustomerSchema>({
@@ -43,7 +49,7 @@ export default function CustomerForm({ customer }: Props) {
     <div className="flex flex-col gap-1 sm:px-8">
       <div>
         <h2 className="text-2xl font-bold">
-          {customer?.id ? "Edit" : "New"} Customer Form
+          {customer?.id ? "Edit" : "New"} Customer {customer?.id ? `#${customer.id}` : "Form"}
         </h2>
       </div>
       <Form {...form}>
@@ -67,7 +73,7 @@ export default function CustomerForm({ customer }: Props) {
               nameInSchema='state'
               data={StatesArray}
             />
-  
+
           </div>
 
           <div className='flex flex-col gap-4 w-full max-w-xs'>
@@ -77,7 +83,14 @@ export default function CustomerForm({ customer }: Props) {
 
             <InputLabel<TInsertCustomerSchema> fieldTitle='Phone Number' nameInSchema='phone' />
 
-            <TextAreaLabel<TInsertCustomerSchema> fieldTitle='Notes' nameInSchema='notes' className='h-40'/>
+            <TextAreaLabel<TInsertCustomerSchema> fieldTitle='Notes' nameInSchema='notes' className='h-40' />
+
+            {/* Client side approach to conditionally render the Active checkbox based on user role */}
+            {isLoading ? <p>Loading...</p> : isManager && customer?.id ?
+              (
+                <CheckboxLabel<TInsertCustomerSchema> fieldTitle='Active' nameInSchema='active' message='Yes' />
+              ) : null
+            }
 
             <div className='flex gap-2'>
               <Button type='submit' className='w-3/4' variant='default' title='Save'>

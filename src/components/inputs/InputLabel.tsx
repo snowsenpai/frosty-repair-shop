@@ -4,6 +4,7 @@ import { useFormContext } from 'react-hook-form'
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { InputHTMLAttributes } from 'react'
+import { cn } from '@/lib/utils'
 
 type Props<S> = {
   fieldTitle: string,
@@ -32,7 +33,7 @@ export function InputLabel<S>({
           <FormControl>
             <Input
               id={nameInSchema}
-              className={`w-full max-w-xs disabled:text-blue-500 dark:disabled:text-green-500 disabled:opacity-75 ${className}`}
+              className={cn("w-full max-w-xs disabled:text-blue-500 dark:disabled:text-yellow-300 disabled:opacity-75 disabled:cursor-not-allowed", className)}
               {...props}
               {...field}
             />

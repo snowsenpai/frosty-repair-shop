@@ -5,6 +5,20 @@ import CustomerForm from '@/app/(rs)/customers/form/CustomerForm';
 
 type TSearchParam = { [key: string]: string | undefined }
 
+export async function generateMetadata({ searchParams }: { searchParams: Promise<TSearchParam> }) {
+  const { customerId } = await searchParams
+
+  if (!customerId) {
+    return {
+      title: 'New Customer',
+    }
+  }
+
+  return {
+    title: `Edit Customer #${customerId}`,
+  }
+}
+
 export default async function CustomerFormPage({ searchParams }: { searchParams: Promise<TSearchParam> }) {
   try {
     const { customerId } = await searchParams

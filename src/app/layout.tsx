@@ -15,11 +15,11 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    template: '%s | Computer Repair Shop',
-    default: 'Computer Repair Shop'
+    template: '%s | Frosty Repair Shop',
+    default: 'Frosty Repair Shop'
   },
   description: "Frosty Computer Repair Shop",
-  applicationName: 'Repair Shop'
+  applicationName: 'Frosty Repair Shop'
 };
 
 export default function RootLayout({
