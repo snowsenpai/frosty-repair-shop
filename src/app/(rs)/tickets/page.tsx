@@ -1,7 +1,14 @@
+import Link from "next/link"
+
 export const metadata = {
-  title: "Ticket",
+  title: "Tickets",
 }
 
 export default function Tickets() {
-  return <h2>Tickets Page</h2>
+  return (
+    <div>
+      <h2>Tickets Page</h2>
+      <Link href="/tickets/form?ticketId=1" className="underline">New Ticket</Link>
+    </div>
+  )
 }

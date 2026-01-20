@@ -1,15 +1,20 @@
 "use client"
 
-import { InputLabel } from '@/components/inputs/InputLabel'
-import { Button } from '@/components/ui/button'
-import { Form } from '@/components/ui/form'
-import { type TSelectCustomerSchema } from '@/schemas/customer'
-import { insertTicketSchema, type TInsertTicketSchema, type TSelectTicketSchema } from '@/schemas/ticket'
-import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useAction } from 'next-safe-action/hooks'
+import { toast } from 'sonner'
+import { LoaderCircle } from 'lucide-react'
+import { Form } from '@/components/ui/form'
+import { Button } from '@/components/ui/button'
+import { InputLabel } from '@/components/inputs/InputLabel'
 import { TextAreaLabel } from '@/components/inputs/TextAreaLabel'
 import { SelectLabel } from '@/components/inputs/SelectLabel'
 import { CheckboxLabel } from '@/components/inputs/CheckboxLabel'
+import { DisplayServerActionResponse } from '@/components/DisplayServerActionResponse'
+import { saveTicketAction } from '@/app/actions/saveTicketAction'
+import { type TSelectCustomerSchema } from '@/schemas/customer'
+import { insertTicketSchema, type TInsertTicketSchema, type TSelectTicketSchema } from '@/schemas/ticket'
 
 type Props = {
   customer: TSelectCustomerSchema,
@@ -36,8 +41,22 @@ export default function TicketForm({ customer, ticket, tech, isEditable = true }
     defaultValues,
   })
 
+  const {
+    execute: saveTicket,
+    result: saveResult,
+    isPending: isSaving,
+    reset: resetSaveAction,
+  } = useAction(saveTicketAction, {
+    onSuccess({ data }) {
+      toast.success(data?.message)
+    },
+    onError() {
+      toast.error('An error occurred while saving ticket')
+    },
+  })
+
   async function submitForm(data: TInsertTicketSchema) {
-    console.log(data)
+    saveTicket(data)
   }
 
   const getFormTitle = () => {
@@ -48,6 +67,7 @@ export default function TicketForm({ customer, ticket, tech, isEditable = true }
 
   return (
     <div className="flex flex-col gap-1 sm:px-8">
+      <DisplayServerActionResponse result={saveResult} />
       <div>
         <h2 className="text-2xl font-bold">
           {getFormTitle()}
@@ -88,10 +108,20 @@ export default function TicketForm({ customer, ticket, tech, isEditable = true }
             {
               isEditable ? (
                 <div className='flex gap-2'>
-                  <Button type='submit' className='w-3/4' variant='default' title='Save'>
-                    Save
+                  <Button type='submit' className='w-3/4' variant='default' title='Save' disabled={isSaving}>
+                    {isSaving ? (
+                      <>
+                        <LoaderCircle className='mr-2 h-4 w-4 animate-spin' />
+                        Saving...
+                      </>) : 'Save'
+                    }
                   </Button>
-                  <Button type='button' variant='destructive' title='Reset' onClick={() => form.reset(defaultValues)}>
+                  <Button type='button' variant='destructive' title='Reset'
+                    onClick={() => {
+                      form.reset(defaultValues)
+                      resetSaveAction()
+                    }}
+                  >
                     Reset
                   </Button>
                 </div>

@@ -3,6 +3,8 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useKindeBrowserClient } from '@kinde-oss/kinde-auth-nextjs'
+import { toast } from 'sonner'
+import { LoaderCircle } from 'lucide-react'
 import { Form } from '@/components/ui/form'
 import { Button } from '@/components/ui/button'
 import { insertCustomerSchema, type TInsertCustomerSchema, type TSelectCustomerSchema } from '@/schemas/customer'
@@ -11,6 +13,9 @@ import { TextAreaLabel } from '@/components/inputs/TextAreaLabel'
 import { SelectLabel } from '@/components/inputs/SelectLabel'
 import { StatesArray } from '@/constants/StatesArray'
 import { CheckboxLabel } from '@/components/inputs/CheckboxLabel'
+import { useAction } from 'next-safe-action/hooks'
+import { saveCustomerAction } from '@/app/actions/saveCustomerAction'
+import { DisplayServerActionResponse } from '@/components/DisplayServerActionResponse'
 
 type Props = {
   customer?: TInsertCustomerSchema
@@ -41,12 +46,31 @@ export default function CustomerForm({ customer }: Props) {
     defaultValues,
   })
 
+  // renamed to avoid conflict if another action is ever added
+  const {
+    execute: saveCustomer,
+    result: saveResult,
+    isPending: isSaving,
+    reset: resetSaveAction,
+  } = useAction(saveCustomerAction, {
+    onSuccess({ data }) {
+      // toast the user
+      toast.success(data.message)
+    },
+    onError({ error }) {
+      // toast the user
+      toast.error('An error occurred while saving customer')
+    },
+  })
+
   async function submitForm(data: TInsertCustomerSchema) {
-    console.log(data)
+    // console.log(data)
+    saveCustomer(data)
   }
 
   return (
     <div className="flex flex-col gap-1 sm:px-8">
+      <DisplayServerActionResponse result={saveResult} />
       <div>
         <h2 className="text-2xl font-bold">
           {customer?.id ? "Edit" : "New"} Customer {customer?.id ? `#${customer.id}` : "Form"}
@@ -93,10 +117,20 @@ export default function CustomerForm({ customer }: Props) {
             }
 
             <div className='flex gap-2'>
-              <Button type='submit' className='w-3/4' variant='default' title='Save'>
-                Save
+              <Button type='submit' className='w-3/4' variant='default' title='Save' disabled={isSaving}>
+                {isSaving ? (
+                  <>
+                    <LoaderCircle className='mr-2 h-4 w-4 animate-spin' />
+                    Saving...
+                  </>) : 'Save'
+                }
               </Button>
-              <Button type='button' variant='destructive' title='Reset' onClick={() => form.reset(defaultValues)}>
+              <Button type='button' variant='destructive' title='Reset'
+                onClick={() => {
+                  form.reset(defaultValues)
+                  resetSaveAction()
+                }}
+              >
                 Reset
               </Button>
             </div>
