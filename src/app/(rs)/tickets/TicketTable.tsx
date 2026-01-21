@@ -1,11 +1,13 @@
 "use client"
 
 import { TTicketSearchResult } from '@/lib/queries/getTicketSearchResults'
-import { createColumnHelper, flexRender, getCoreRowModel, useReactTable, getPaginationRowModel } from '@tanstack/react-table'
+import { createColumnHelper, flexRender, getCoreRowModel, useReactTable, ColumnFiltersState, getPaginationRowModel, getFilteredRowModel, getFacetedUniqueValues } from '@tanstack/react-table'
 import { Table, TableBody, TableCell, TableHeader, TableRow, TableHead } from '@/components/ui/table'
 import { useRouter } from 'next/navigation'
 import { CircleCheckIcon, CircleXIcon } from 'lucide-react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
+import Filter from '@/components/react-table/Filter'
 
 type Props = {
   data: TTicketSearchResult,
@@ -17,6 +19,8 @@ type ColumnHeaderKey = keyof TicketRow
 
 export default function TicketTable({ data }: Props) {
   const router = useRouter()
+
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
 
   const columnHeaderArray: ColumnHeaderKey[] = [
     'ticketDate',
@@ -77,9 +81,13 @@ export default function TicketTable({ data }: Props) {
   const table = useReactTable({
     data,
     columns,
+    state: { columnFilters },
     initialState: { pagination: { pageSize: 10 } },
+    onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getFacetedUniqueValues: getFacetedUniqueValues(),
   })
 
   return (
@@ -95,7 +103,7 @@ export default function TicketTable({ data }: Props) {
                     // render each header cell
                     headerGroup.headers.map((header) => {
                       return (
-                        <TableHead key={header.id} className='bg-secondary'>
+                        <TableHead key={header.id} className='bg-secondary p-1'>
                           <div>
                             {header.isPlaceholder
                               ? null
@@ -105,6 +113,11 @@ export default function TicketTable({ data }: Props) {
                               )
                             }
                           </div>
+                          {header.column.getCanFilter() ? (
+                            <div className='grid place-content-center'>
+                              <Filter column={header.column} />
+                            </div>
+                          ) : null}
                         </TableHead>
                       )
                     })
@@ -145,6 +158,12 @@ export default function TicketTable({ data }: Props) {
           </p>
         </div>
         <div className='space-x-1'>
+          <Button
+            variant='outline'
+            onClick={() => table.resetColumnFilters()}
+          >
+            Reset Filters
+          </Button>
           <Button
             variant='outline'
             className='disabled:pointer-events-auto disabled:cursor-not-allowed'
