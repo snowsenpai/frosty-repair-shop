@@ -2,6 +2,7 @@ import Link from "next/link"
 import TicketSearch from '@/app/(rs)/tickets/TicketSearch'
 import { getTicketSearchResults } from '@/lib/queries/getTicketSearchResults'
 import { getOpenTickets } from '@/lib/queries/getOpenTickets'
+import TicketTable from '@/app/(rs)/tickets/TicketTable'
 
 type TSearchParam = { [key: string]: string | undefined }
 
@@ -17,9 +18,14 @@ export default async function Tickets({ searchParams }: { searchParams: Promise<
     const results = await getOpenTickets()
     return (
       <>
-      <TicketSearch />
-      <p>{JSON.stringify(results)}</p>
-      <Link href="/tickets/form" className="underline">New Ticket</Link>
+        <TicketSearch />
+        {
+          results.length ? <TicketTable data={results} /> : (
+            <div className='mt-6 p-4 bg-secondary rounded-md'>
+              <p className='mb-4'>No open tickets found.</p>
+            </div>
+          )
+        }
       </>
     )
   }
@@ -31,8 +37,13 @@ export default async function Tickets({ searchParams }: { searchParams: Promise<
   return (
     <div>
       <TicketSearch />
-      <p>{JSON.stringify(results)}</p>
-      <Link href="/tickets/form" className="underline">New Ticket</Link>
+      {
+        results.length ? <TicketTable data={results} /> : (
+          <div className='mt-6 p-4 bg-secondary rounded-md'>
+            <p className='mb-4'>No tickets found matching "{searchText}".</p>
+          </div>
+        )
+      }
     </div>
   )
 }

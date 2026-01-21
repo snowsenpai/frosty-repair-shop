@@ -1,43 +1,77 @@
 "use client"
 
-import { TSelectCustomerSchema } from '@/schemas/customer'
+import { TTicketSearchResult } from '@/lib/queries/getTicketSearchResults'
 import { createColumnHelper, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { Table, TableBody, TableCell, TableHeader, TableRow, TableHead } from '@/components/ui/table'
 import { useRouter } from 'next/navigation'
+import { CircleCheckIcon, CircleXIcon } from 'lucide-react'
 
 type Props = {
-  data: TSelectCustomerSchema[],
+  data: TTicketSearchResult,
 }
 
-export default function CustomerTable({ data }: Props) {
+type TicketRow = TTicketSearchResult[number]
+
+type ColumnHeaderKey = keyof TicketRow
+
+export default function TicketTable({ data }: Props) {
   const router = useRouter()
 
-  const columnHeaderArray: Array<keyof TSelectCustomerSchema> = [
+  const columnHeaderArray: ColumnHeaderKey[] = [
+    'ticketDate',
+    'title',
+    'tech',
     'firstName',
     'lastName',
     'email',
-    'phone',
-    'city',
-    'zip',
+    'completed',
   ]
 
-  const columnLabels: Partial<Record<keyof TSelectCustomerSchema, string>> = {
+  const columnLabels: Record<ColumnHeaderKey, string> = {
+    id: 'ID',
+    ticketDate: 'Date',
+    title: 'Title',
+    tech: 'Tech',
     firstName: 'First Name',
     lastName: 'Last Name',
     email: 'Email',
-    phone: 'Phone',
-    city: 'City',
-    zip: 'Zip',
+    completed: 'Completed',
   }
 
-  const columnHelper = createColumnHelper<TSelectCustomerSchema>()
+  const columnHelper = createColumnHelper<TicketRow>()
 
-  const columns = columnHeaderArray.map((columnName) =>
-    columnHelper.accessor(columnName, {
+  const columns = columnHeaderArray.map((columnName) => {
+    return columnHelper.accessor((row) => {
+      // transformational - prepare data for sorting/filtering
+      const value = row[columnName]
+      if (columnName === 'ticketDate' && value instanceof Date) {
+        return value.toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+        })
+      }
+      if (columnName === 'completed') {
+        return value ? 'COMPLETED' : 'OPEN'
+      }
+      return value
+    }, {
       id: columnName,
       header: columnLabels[columnName],
+      cell: ({ getValue }) => {
+        // presentational - render the UI
+        const value = getValue()
+        if (columnName === 'completed') {
+          return (
+            <div className="grid place-content-center">
+              {value === 'OPEN' ? <CircleXIcon className="opacity-25" /> : <CircleCheckIcon className="text-green-600" />}
+            </div>
+          )
+        }
+        return value
+      },
     })
-  )
+  })
 
   const table = useReactTable({
     data,
@@ -82,7 +116,7 @@ export default function CustomerTable({ data }: Props) {
               <TableRow
                 key={row.id}
                 className='cursor-pointer hover:bg-border/25 dark:hover:bg-ring/40'
-                onClick={() => router.push(`/customers/form?customerId=${row.original.id}`)}
+                onClick={() => router.push(`/tickets/form?ticketId=${row.original.id}`)}
               >
                 {
                   // render each cell in the row
