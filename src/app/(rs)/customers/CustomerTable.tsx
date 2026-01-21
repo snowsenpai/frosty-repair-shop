@@ -1,10 +1,13 @@
 "use client"
 
 import { TSelectCustomerSchema } from '@/schemas/customer'
-import { createColumnHelper, flexRender, getCoreRowModel, useReactTable, getPaginationRowModel } from '@tanstack/react-table'
+import { createColumnHelper, flexRender, getCoreRowModel, useReactTable, ColumnFiltersState, SortingState, getPaginationRowModel, getFilteredRowModel, getFacetedUniqueValues, getSortedRowModel } from '@tanstack/react-table'
 import { Table, TableBody, TableCell, TableHeader, TableRow, TableHead } from '@/components/ui/table'
 import { useRouter } from 'next/navigation'
+import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
+import Filter from '@/components/react-table/Filter'
 
 type Props = {
   data: TSelectCustomerSchema[],
@@ -12,6 +15,15 @@ type Props = {
 
 export default function CustomerTable({ data }: Props) {
   const router = useRouter()
+
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+
+  const [sorting, setSorting] = useState<SortingState>([
+    {
+      id: 'lastName',
+      desc: false, // ascending order
+    }
+  ])
 
   const columnHeaderArray: Array<keyof TSelectCustomerSchema> = [
     'firstName',
@@ -36,16 +48,42 @@ export default function CustomerTable({ data }: Props) {
   const columns = columnHeaderArray.map((columnName) =>
     columnHelper.accessor(columnName, {
       id: columnName,
-      header: columnLabels[columnName],
+      header: ({ column }) => {
+        return (
+          <Button
+            variant='ghost'
+            className='pl-1 w-full flex justify-between'
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          >
+            {columnLabels[columnName]}
+
+            {
+              column.getIsSorted() === 'asc' ? (
+                <ArrowUp className='ml-2 h-4 w-4' />
+              ) : column.getIsSorted() === 'desc' ? (
+                <ArrowDown className='ml-2 h-4 w-4' />
+              ) : (
+                <ArrowUpDown className='ml-2 h-4 w-4' />
+              )
+            }
+          </Button>
+        )
+      },
     })
   )
 
   const table = useReactTable({
     data,
     columns,
+    state: { columnFilters, sorting },
     initialState: { pagination: { pageSize: 10 } },
+    onColumnFiltersChange: setColumnFilters,
+    onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getFacetedUniqueValues: getFacetedUniqueValues(),
+    getSortedRowModel: getSortedRowModel(),
   })
 
   return (
@@ -61,7 +99,7 @@ export default function CustomerTable({ data }: Props) {
                     // render each header cell
                     headerGroup.headers.map((header) => {
                       return (
-                        <TableHead key={header.id} className='bg-secondary'>
+                        <TableHead key={header.id} className='bg-secondary p-1'>
                           <div>
                             {header.isPlaceholder
                               ? null
@@ -71,6 +109,11 @@ export default function CustomerTable({ data }: Props) {
                               )
                             }
                           </div>
+                          {header.column.getCanFilter() ? (
+                            <div className='grid place-content-center'>
+                              <Filter column={header.column} />
+                            </div>
+                          ) : null}
                         </TableHead>
                       )
                     })
@@ -111,6 +154,18 @@ export default function CustomerTable({ data }: Props) {
           </p>
         </div>
         <div className='space-x-1'>
+          <Button
+            variant='outline'
+            onClick={() => table.resetSorting()}
+          >
+            Reset Sorting
+          </Button>
+          <Button
+            variant='outline'
+            onClick={() => table.resetColumnFilters()}
+          >
+            Reset Filters
+          </Button>
           <Button
             variant='outline'
             className='disabled:pointer-events-auto disabled:cursor-not-allowed'
