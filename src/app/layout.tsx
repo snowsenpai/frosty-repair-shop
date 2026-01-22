@@ -20,7 +20,10 @@ export const metadata: Metadata = {
     default: 'Frosty Repair Shop'
   },
   description: "Frosty Computer Repair Shop",
-  applicationName: 'Frosty Repair Shop'
+  applicationName: 'Frosty Repair Shop',
+  icons: {
+    icon: '/icon.png',
+  },
 };
 
 export default function RootLayout({
