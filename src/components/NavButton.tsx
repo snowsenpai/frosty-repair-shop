@@ -15,7 +15,7 @@ export function NavButton({ icon: Icon, label, href }: Prop) {
       size="icon"
       aria-label={label}
       title={label}
-      className="rounded-full"
+      className="rounded-full cursor-pointer"
       asChild
     >
       {

@@ -85,10 +85,10 @@ export default async function TicketFormPage({ searchParams }: { searchParams: P
       kindeInit() // Initialize Kinde Management API
 
       const { users } = await Users.getUsers()
-      const tech = users ? users.map(user => ({ id: user.email!, description: user.email! })) : []
+      const tech = users ? users.map(user => ({ id: user.email?.toLowerCase()!, description: user.email?.toLowerCase()! })) : []
 
       return (
-        <TicketForm customer={customer} ticket={ticket} tech={tech} />
+        <TicketForm customer={customer} ticket={ticket} tech={tech} isManager={isManager} />
       )
     }
 
@@ -123,10 +123,10 @@ export default async function TicketFormPage({ searchParams }: { searchParams: P
       kindeInit() // Initialize Kinde Management API
 
       const { users } = await Users.getUsers()
-      const tech = users ? users.map(user => ({ id: user.email!, description: user.email! })) : []
+      const tech = users ? users.map(user => ({ id: user.email?.toLowerCase()!, description: user.email?.toLowerCase()! })) : []
 
       return (
-        <TicketForm customer={customer} tech={tech} />
+        <TicketForm customer={customer} tech={tech} isManager={isManager} />
       )
     }
 

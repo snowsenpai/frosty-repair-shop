@@ -2,9 +2,10 @@
 
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useKindeBrowserClient } from '@kinde-oss/kinde-auth-nextjs'
 import { toast } from 'sonner'
 import { LoaderCircle } from 'lucide-react'
+import { useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { Form } from '@/components/ui/form'
 import { Button } from '@/components/ui/button'
 import { insertCustomerSchema, type TInsertCustomerSchema, type TSelectCustomerSchema } from '@/schemas/customer'
@@ -19,13 +20,29 @@ import { DisplayServerActionResponse } from '@/components/DisplayServerActionRes
 
 type Props = {
   customer?: TInsertCustomerSchema
+  isManager?: boolean
 }
 
-export default function CustomerForm({ customer }: Props) {
-  const { getPermission, isLoading } = useKindeBrowserClient();
-  const isManager = !isLoading && getPermission("manager")?.isGranted;
+export default function CustomerForm({ customer, isManager = false }: Props) {
+  const searchParams = useSearchParams()
+  const hasCustomerIdParam = searchParams.has('customerId')
 
-  const defaultValues: TInsertCustomerSchema = {
+  const emptyCustomerValues: TInsertCustomerSchema = {
+    id: 0,
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    address1: '',
+    address2: '',
+    city: '',
+    state: '',
+    zip: '',
+    notes: '',
+    active: true,
+  }
+
+  const defaultValues: TInsertCustomerSchema = hasCustomerIdParam ? {
     id: customer?.id ?? 0,
     firstName: customer?.firstName ?? '',
     lastName: customer?.lastName ?? '',
@@ -38,13 +55,17 @@ export default function CustomerForm({ customer }: Props) {
     zip: customer?.zip ?? '',
     notes: customer?.notes ?? '',
     active: customer?.active ?? true,
-  }
+  } : emptyCustomerValues
 
   const form = useForm<TInsertCustomerSchema>({
     mode: 'onBlur',
     resolver: zodResolver(insertCustomerSchema),
     defaultValues,
   })
+
+  useEffect(() => {
+    form.reset(hasCustomerIdParam ? defaultValues : emptyCustomerValues)
+  }, [searchParams.get('customerId')]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // renamed to avoid conflict if another action is ever added
   const {
@@ -110,7 +131,7 @@ export default function CustomerForm({ customer }: Props) {
             <TextAreaLabel<TInsertCustomerSchema> fieldTitle='Notes' nameInSchema='notes' className='h-40' />
 
             {/* Client side approach to conditionally render the Active checkbox based on user role */}
-            {isLoading ? <p>Loading...</p> : isManager && customer?.id ?
+            {isManager && customer?.id ?
               (
                 <CheckboxLabel<TInsertCustomerSchema> fieldTitle='Active' nameInSchema='active' message='Yes' />
               ) : null

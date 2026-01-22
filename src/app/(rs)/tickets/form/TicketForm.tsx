@@ -21,18 +21,17 @@ type Props = {
   ticket?: TSelectTicketSchema,
   tech?: { id: string, description: string }[]
   isEditable?: boolean
+  isManager?: boolean
 }
 
-export default function TicketForm({ customer, ticket, tech, isEditable = true }: Props) {
-  const isManager = Array.isArray(tech);
-
+export default function TicketForm({ customer, ticket, tech, isEditable = true, isManager = false }: Props) {
   const defaultValues: TInsertTicketSchema = {
     id: ticket?.id ?? '(New)',
     customerId: ticket?.customerId ?? customer.id,
     title: ticket?.title ?? '',
     description: ticket?.description ?? '',
     completed: ticket?.completed ?? false,
-    tech: ticket?.tech ?? 'new-ticket@example.com',
+    tech: ticket?.tech.toLowerCase() ?? 'new-ticket@example.com',
   }
 
   const form = useForm<TInsertTicketSchema>({
@@ -81,7 +80,7 @@ export default function TicketForm({ customer, ticket, tech, isEditable = true }
           <div className='flex flex-col gap-4 w-full max-w-xs'>
             <InputLabel<TInsertTicketSchema> fieldTitle='Title' nameInSchema='title' disabled={!isEditable} />
 
-            {isManager ? (
+            {isManager && tech ? (
               <SelectLabel<TInsertTicketSchema> fieldTitle='Tech ID' nameInSchema='tech' data={[{ id: 'new-ticket@example.com', description: 'new-ticket@example.com' }, ...tech]} />
             ) : (
               <InputLabel<TInsertTicketSchema> fieldTitle='Tech' nameInSchema='tech' disabled={true} />
@@ -103,7 +102,7 @@ export default function TicketForm({ customer, ticket, tech, isEditable = true }
           </div>
 
           <div className='flex flex-col gap-4 w-full max-w-xs'>
-            <TextAreaLabel<TInsertTicketSchema> fieldTitle='Description' nameInSchema='description' className='h-96' disabled={!isEditable} />
+            <TextAreaLabel<TInsertTicketSchema> fieldTitle='Description' nameInSchema='description' className='h-96' disabled={!isEditable} placeholder='Ticket Description' />
 
             {
               isEditable ? (

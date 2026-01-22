@@ -17,7 +17,6 @@ export const actionClient = createSafeActionClient({
     });
   },
   handleServerError(e, utils) {
-    console.log('e.constructor.name', e.constructor.name)
     const { clientInput, metadata } = utils;
     Sentry.captureException(e, (scope) => {
       scope.clear()

@@ -21,14 +21,14 @@ export default function NavButtonMenu({ icon: Icon, label, choices }: Props) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant='ghost' size='icon' className='rounded-full' title={label} aria-label={label}>
+        <Button variant='ghost' size='icon' className='rounded-full cursor-pointer' title={label} aria-label={label}>
           <Icon className='h-[1.2rem] w-[1.2rem]' />
           <span className="sr-only">{label}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
         {choices.map((choice) => (
-          <DropdownMenuItem key={choice.href} asChild>
+          <DropdownMenuItem key={choice.href} asChild className='cursor-pointer'>
             <Link href={choice.href}>{choice.title}</Link>
           </DropdownMenuItem>
         ))}

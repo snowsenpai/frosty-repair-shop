@@ -8,7 +8,7 @@ export default function SearchButton() {
   const status = useFormStatus()
 
   return (
-    <Button type="submit" disabled={status.pending} className='w-20'>
+    <Button type="submit" disabled={status.pending} className='cursor-pointer w-20'>
       {/* className="mr-2 h-4 w-4 animate-spin" */}
       {status.pending ? <Loader className="animate-spin" /> : 'Search'}
     </Button>
