@@ -22,7 +22,8 @@ export const metadata: Metadata = {
   description: "Frosty Computer Repair Shop",
   applicationName: 'Frosty Repair Shop',
   icons: {
-    icon: '/icon.png',
+    icon: '/favicon.png',
+    apple: '/favicon.png',
   },
 };
 
